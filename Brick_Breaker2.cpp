@@ -4,8 +4,8 @@ using namespace std;
 
 bool quit = false;
 SDL_Event event;
-int ball_x = 10;
-int ball_y = 10;
+int ball_x = 200;
+int ball_y = 200;
 int ball_vel_x = 1;
 int ball_vel_y = 1;
 int background_w = 800;
@@ -18,7 +18,12 @@ int floor_x = background_w / 2;
 int floor_y = background_h - 30;
 SDL_Surface* brick;
 SDL_Texture* brick_texture;
+SDL_Surface* brick2;
+SDL_Texture* brick_texture2;
+SDL_Surface* brick3;
+SDL_Texture* brick_texture3;
 SDL_Rect brick_rect[3][7];
+SDL_Rect ball_rect;
 
 void InitializerBrick() {
 	brick_rect[0][0] = { 50, 50, brick_w, brick_h };
@@ -78,6 +83,36 @@ void ballCollision() {
 	}
 }
 
+bool brickCollisionDetect(SDL_Rect rect1, SDL_Rect rect2) {
+	if (rect1.x > rect2.x + rect2.w) {
+		return false;
+	}
+	if (rect1.x + rect1.w < rect2.x) {
+		return false;
+	}
+	if (rect1.y > rect2.y + rect2.h) {
+		return false;
+	}
+	if (rect1.y + rect2.h < rect2.y) {
+		return false;
+	}
+	return true;
+}
+
+void brickCollision() {
+	bool a;
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 7; j++) {
+			a = brickCollisionDetect(brick_rect[i][j], ball_rect);
+			if (a == true) {
+				brick_rect[i][j].x = 3000;
+				ball_vel_y = -ball_vel_y;
+			}
+			a = false;
+		}
+	}
+}
+
 int main(int argc, char** argv) {
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -85,22 +120,27 @@ int main(int argc, char** argv) {
 	SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, 0);
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
 	SDL_Rect background_rect = { 0, 0, 800, 600 };
+	InitializerBrick();
 	SDL_Surface* ball = SDL_LoadBMP("ball.bmp");
 	SDL_Surface* background = SDL_LoadBMP("background.bmp");
 	SDL_Surface* floor = SDL_LoadBMP("floor.bmp");
 	brick = SDL_LoadBMP("brick.bmp");
+	brick2 = SDL_LoadBMP("brick2.bmp");
+	brick3 = SDL_LoadBMP("brick3.bmp");
 	SDL_Texture* ball_texture = SDL_CreateTextureFromSurface(renderer, ball);
 	SDL_Texture* background_texture = SDL_CreateTextureFromSurface(renderer, background);
 	SDL_Texture* floor_texture = SDL_CreateTextureFromSurface(renderer, floor);
 	brick_texture = SDL_CreateTextureFromSurface(renderer, brick);
+	brick_texture2 = SDL_CreateTextureFromSurface(renderer, brick2);
+	brick_texture3 = SDL_CreateTextureFromSurface(renderer, brick3);
 
 	while (!quit) {
 		EventHandler();
-		SDL_Rect ball_rect = {ball_x, ball_y, 20, 30};
+		ball_rect = {ball_x, ball_y, 20, 30};
 		SDL_Rect floor_rect = { floor_x, floor_y, 60, 30 };
 		moveBall();
 		ballCollision();
-		InitializerBrick();
+		brickCollision();
 		SDL_RenderCopy(renderer, background_texture, NULL, &background_rect);
 		SDL_RenderCopy(renderer, ball_texture, NULL, &ball_rect);
 		SDL_RenderCopy(renderer, floor_texture, NULL, &floor_rect);
@@ -111,20 +151,20 @@ int main(int argc, char** argv) {
 		SDL_RenderCopy(renderer, brick_texture, NULL, &brick_rect[0][4]);
 		SDL_RenderCopy(renderer, brick_texture, NULL, &brick_rect[0][5]);
 		SDL_RenderCopy(renderer, brick_texture, NULL, &brick_rect[0][6]);
-		SDL_RenderCopy(renderer, brick_texture, NULL, &brick_rect[1][0]);
-		SDL_RenderCopy(renderer, brick_texture, NULL, &brick_rect[1][1]);
-		SDL_RenderCopy(renderer, brick_texture, NULL, &brick_rect[1][2]);
-		SDL_RenderCopy(renderer, brick_texture, NULL, &brick_rect[1][3]);
-		SDL_RenderCopy(renderer, brick_texture, NULL, &brick_rect[1][4]);
-		SDL_RenderCopy(renderer, brick_texture, NULL, &brick_rect[1][5]);
-		SDL_RenderCopy(renderer, brick_texture, NULL, &brick_rect[1][6]);
-		SDL_RenderCopy(renderer, brick_texture, NULL, &brick_rect[2][0]);
-		SDL_RenderCopy(renderer, brick_texture, NULL, &brick_rect[2][1]);
-		SDL_RenderCopy(renderer, brick_texture, NULL, &brick_rect[2][2]);
-		SDL_RenderCopy(renderer, brick_texture, NULL, &brick_rect[2][3]);
-		SDL_RenderCopy(renderer, brick_texture, NULL, &brick_rect[2][4]);
-		SDL_RenderCopy(renderer, brick_texture, NULL, &brick_rect[2][5]);
-		SDL_RenderCopy(renderer, brick_texture, NULL, &brick_rect[2][6]);
+		SDL_RenderCopy(renderer, brick_texture2, NULL, &brick_rect[1][0]);
+		SDL_RenderCopy(renderer, brick_texture2, NULL, &brick_rect[1][1]);
+		SDL_RenderCopy(renderer, brick_texture2, NULL, &brick_rect[1][2]);
+		SDL_RenderCopy(renderer, brick_texture2, NULL, &brick_rect[1][3]);
+		SDL_RenderCopy(renderer, brick_texture2, NULL, &brick_rect[1][4]);
+		SDL_RenderCopy(renderer, brick_texture2, NULL, &brick_rect[1][5]);
+		SDL_RenderCopy(renderer, brick_texture2, NULL, &brick_rect[1][6]);
+		SDL_RenderCopy(renderer, brick_texture3, NULL, &brick_rect[2][0]);
+		SDL_RenderCopy(renderer, brick_texture3, NULL, &brick_rect[2][1]);
+		SDL_RenderCopy(renderer, brick_texture3, NULL, &brick_rect[2][2]);
+		SDL_RenderCopy(renderer, brick_texture3, NULL, &brick_rect[2][3]);
+		SDL_RenderCopy(renderer, brick_texture3, NULL, &brick_rect[2][4]);
+		SDL_RenderCopy(renderer, brick_texture3, NULL, &brick_rect[2][5]);
+		SDL_RenderCopy(renderer, brick_texture3, NULL, &brick_rect[2][6]);
 		SDL_RenderPresent(renderer);
 		SDL_RenderClear(renderer);
 		SDL_Delay(3);
