@@ -3,6 +3,7 @@
 using namespace std;
 
 bool quit = false;
+void Destroy();
 SDL_Event event;
 SDL_Window* window;
 SDL_Renderer* renderer;
@@ -74,6 +75,17 @@ void EventHandler() {
 	}
 }
 
+void gameOver() {
+	SDL_Surface* gameover = SDL_LoadBMP("gameover.bmp");
+	SDL_Texture* gameover_texture = SDL_CreateTextureFromSurface(renderer, gameover);
+	SDL_Rect gameover_rect = { 0, 0, background_w, background_h };
+	SDL_RenderCopy(renderer, gameover_texture, NULL, &gameover_rect);
+	SDL_RenderPresent(renderer);
+	SDL_Delay(10000);
+	Destroy();
+	SDL_Quit();
+}
+
 void moveBall() {
 	ball_x = ball_x + ball_vel_x;
 	ball_y = ball_y + ball_vel_y;
@@ -83,8 +95,11 @@ void ballCollision() {
 	if (ball_x < background_min_w || ball_x > background_w - 30) {
 		ball_vel_x = -ball_vel_x;
 	}
-	if (ball_y < background_min_h || ball_y > background_h - 30) {
+	if (ball_y < background_min_h) {
 		ball_vel_y = -ball_vel_y;
+	}
+	if (ball_y > background_h + 60) {
+		gameOver();
 	}
 	int ballscaling = 20;
 	if (ball_y + ballscaling >= floor_y && ball_y + ballscaling <= floor_y + 30 &&
