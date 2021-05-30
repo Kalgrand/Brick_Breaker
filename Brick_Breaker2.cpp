@@ -4,6 +4,22 @@ using namespace std;
 
 bool quit = false;
 SDL_Event event;
+SDL_Window* window;
+SDL_Renderer* renderer;
+SDL_Surface* ball;
+SDL_Surface* background;
+SDL_Surface* floor1;
+SDL_Surface* brick;
+SDL_Surface* brick2;
+SDL_Surface* brick3;
+SDL_Texture* ball_texture;
+SDL_Texture* background_texture;
+SDL_Texture* floor_texture;
+SDL_Texture* brick_texture;
+SDL_Texture* brick_texture2;
+SDL_Texture* brick_texture3;
+SDL_Rect brick_rect[3][7];
+SDL_Rect ball_rect;
 int ball_x = 200;
 int ball_y = 200;
 int ball_vel_x = 1;
@@ -16,14 +32,8 @@ int background_min_w = 0;
 int background_min_h = 0;
 int floor_x = background_w / 2;
 int floor_y = background_h - 30;
-SDL_Surface* brick;
-SDL_Texture* brick_texture;
-SDL_Surface* brick2;
-SDL_Texture* brick_texture2;
-SDL_Surface* brick3;
-SDL_Texture* brick_texture3;
-SDL_Rect brick_rect[3][7];
-SDL_Rect ball_rect;
+int delete_brick_count = 0;
+int no_of_brick = 21;
 
 void InitializerBrick() {
 	brick_rect[0][0] = { 50, 50, brick_w, brick_h };
@@ -107,29 +117,58 @@ void brickCollision() {
 			if (a == true) {
 				brick_rect[i][j].x = 3000;
 				ball_vel_y = -ball_vel_y;
+				delete_brick_count++;
 			}
 			a = false;
 		}
 	}
 }
 
+void Destroy() {
+	SDL_DestroyTexture(floor_texture);
+	SDL_DestroyTexture(brick_texture);
+	SDL_DestroyTexture(brick_texture2);
+	SDL_DestroyTexture(brick_texture3);
+	SDL_DestroyTexture(background_texture);
+	SDL_DestroyTexture(ball_texture);
+	SDL_FreeSurface(floor1);
+	SDL_FreeSurface(brick);
+	SDL_FreeSurface(brick2);
+	SDL_FreeSurface(brick3);
+	SDL_FreeSurface(background);
+	SDL_FreeSurface(ball);
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+}
+
+void winning() {
+	SDL_Surface* win = SDL_LoadBMP("win.bmp");
+	SDL_Texture* win_texture = SDL_CreateTextureFromSurface(renderer, win);
+	SDL_Rect win_rect = { 250, 200, 350, 350 };
+	SDL_RenderCopy(renderer, win_texture, NULL, &win_rect);
+	SDL_RenderPresent(renderer);
+	SDL_Delay(10000);
+	Destroy();
+	SDL_Quit();
+}
+
 int main(int argc, char** argv) {
 	SDL_Init(SDL_INIT_VIDEO);
 
-	SDL_Window* window = SDL_CreateWindow("The Game",
+	window = SDL_CreateWindow("The Game",
 	SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, 0);
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
+	renderer = SDL_CreateRenderer(window, -1, 0);
 	SDL_Rect background_rect = { 0, 0, 800, 600 };
 	InitializerBrick();
-	SDL_Surface* ball = SDL_LoadBMP("ball.bmp");
-	SDL_Surface* background = SDL_LoadBMP("background.bmp");
-	SDL_Surface* floor = SDL_LoadBMP("floor.bmp");
+	ball = SDL_LoadBMP("ball.bmp");
+	background = SDL_LoadBMP("background.bmp");
+	floor1 = SDL_LoadBMP("floor.bmp");
 	brick = SDL_LoadBMP("brick.bmp");
 	brick2 = SDL_LoadBMP("brick2.bmp");
 	brick3 = SDL_LoadBMP("brick3.bmp");
-	SDL_Texture* ball_texture = SDL_CreateTextureFromSurface(renderer, ball);
-	SDL_Texture* background_texture = SDL_CreateTextureFromSurface(renderer, background);
-	SDL_Texture* floor_texture = SDL_CreateTextureFromSurface(renderer, floor);
+	ball_texture = SDL_CreateTextureFromSurface(renderer, ball);
+	background_texture = SDL_CreateTextureFromSurface(renderer, background);
+	floor_texture = SDL_CreateTextureFromSurface(renderer, floor1);
 	brick_texture = SDL_CreateTextureFromSurface(renderer, brick);
 	brick_texture2 = SDL_CreateTextureFromSurface(renderer, brick2);
 	brick_texture3 = SDL_CreateTextureFromSurface(renderer, brick3);
@@ -141,6 +180,9 @@ int main(int argc, char** argv) {
 		moveBall();
 		ballCollision();
 		brickCollision();
+		if (delete_brick_count == no_of_brick) {
+			winning();
+		}
 		SDL_RenderCopy(renderer, background_texture, NULL, &background_rect);
 		SDL_RenderCopy(renderer, ball_texture, NULL, &ball_rect);
 		SDL_RenderCopy(renderer, floor_texture, NULL, &floor_rect);
@@ -170,7 +212,7 @@ int main(int argc, char** argv) {
 		SDL_Delay(3);
 	}
 
-	SDL_Delay(6000);
+	Destroy();
 	SDL_Quit();
 	return 0;
 }
