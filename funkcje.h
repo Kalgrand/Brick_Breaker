@@ -79,6 +79,8 @@ void EventHandler() {
 			ball_x = ball_x + ball_vel_x;
 			ball_y = ball_y + ball_vel_y;
 		}
+	}
+	if (event.type == SDL_KEYUP) {
 		if (event.key.keysym.sym == SDLK_DOWN) {
 			ball_x = ball_x - ball_vel_x;
 			ball_y = ball_y - ball_vel_y;
